@@ -1,0 +1,7 @@
+{
+  "name": "MXN Modern Herbal E-Commerce",
+  "description": "A modern herbal e-commerce platform for MXN Modern Herbal Group with product management, shopping cart, and admin dashboard features.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
