@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Product } from '../types';
-import Slider from '../components/Slider';
-import ProductCard from '../components/ProductCard';
+import { Product } from '../types.ts';
+import Slider from '../components/Slider.tsx';
+import ProductCard from '../components/ProductCard.tsx';
 
 interface HomeProps {
   products: Product[];
