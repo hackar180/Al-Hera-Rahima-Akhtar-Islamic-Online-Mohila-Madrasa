@@ -12,7 +12,8 @@ interface HomeProps {
   setActiveCategory: (cat: string) => void;
 }
 
-const CATEGORIES = ['সকল পণ্য', 'Personal Care', 'Hair Care', 'Food & Nutrition', 'General'];
+// আপডেট করা ক্যাটাগরি লিস্ট
+const CATEGORIES = ['সকল পণ্য', 'Medicine', 'Hair Care', 'Personal Care', 'Food & Nutrition', 'General'];
 
 const Home: React.FC<HomeProps> = ({ products, addToCart, isSearching, activeCategory, setActiveCategory }) => {
   return (
