@@ -7,7 +7,7 @@ import Admin from './pages/Admin.tsx';
 import Cart from './pages/Cart.tsx';
 import Checkout from './pages/Checkout.tsx';
 
-// ডিফল্ট কিছু পণ্য
+// সবাই যাতে দেখতে পারে সেজন্য আপনার অ্যাড করা পণ্যগুলো এখানে লিস্ট করতে হবে
 const INITIAL_PRODUCTS: Product[] = [
   {
     id: '1',
@@ -38,9 +38,10 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('সকল পণ্য');
   
-  const PRODUCTS_KEY = 'mxn_final_database_v6';
-  const CART_KEY = 'mxn_final_cart_v6';
+  const PRODUCTS_KEY = 'mxn_global_db_v7';
+  const CART_KEY = 'mxn_cart_v7';
 
+  // LocalStorage থেকে পণ্য লোড করা (শুধুমাত্র আপনার নিজের ডিভাইসে কাজ করবে)
   const [products, setProducts] = useState<Product[]>(() => {
     try {
       const saved = localStorage.getItem(PRODUCTS_KEY);
@@ -87,7 +88,6 @@ const App: React.FC = () => {
       }
       return [...prev, { ...product, cartQuantity: 1 }];
     });
-    // সরাসরি কার্ট পেজে নিয়ে যাওয়া হবে
     setView('cart');
     window.scrollTo(0, 0);
   };
@@ -119,13 +119,6 @@ const App: React.FC = () => {
     if(window.confirm('আপনি কি নিশ্চিত যে এই পণ্যটি মুছে ফেলতে চান?')) {
       setProducts(prev => prev.filter(p => p.id !== id));
       setCart(prev => prev.filter(item => item.id !== id));
-    }
-  };
-
-  const deleteAllProducts = () => {
-    if(window.confirm('আপনি কি নিশ্চিত যে ডাটাবেস থেকে সব পণ্য মুছে ফেলবেন? এটি আর ফিরিয়ে আনা যাবে না!')) {
-      setProducts([]);
-      setCart([]);
     }
   };
 
@@ -170,7 +163,7 @@ const App: React.FC = () => {
             onAdd={addProduct} 
             onUpdate={updateProduct}
             onDelete={deleteProduct} 
-            onDeleteAll={deleteAllProducts}
+            onDeleteAll={() => { if(window.confirm('সব মুছবেন?')) setProducts([]); }}
           />
         )}
       </main>
