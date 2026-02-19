@@ -6,8 +6,9 @@ import Home from './pages/Home.tsx';
 import Admin from './pages/Admin.tsx';
 import Cart from './pages/Cart.tsx';
 import Checkout from './pages/Checkout.tsx';
+import { db, isConfigured } from './firebaseConfig.ts';
+import { ref, onValue, set } from "firebase/database";
 
-// সবাই যাতে দেখতে পারে সেজন্য আপনার অ্যাড করা পণ্যগুলো এখানে লিস্ট করতে হবে
 const INITIAL_PRODUCTS: Product[] = [
   {
     id: '1',
@@ -41,8 +42,8 @@ const App: React.FC = () => {
   const PRODUCTS_KEY = 'mxn_global_db_v7';
   const CART_KEY = 'mxn_cart_v7';
 
-  // LocalStorage থেকে পণ্য লোড করা (শুধুমাত্র আপনার নিজের ডিভাইসে কাজ করবে)
   const [products, setProducts] = useState<Product[]>(() => {
+    // লোডিংয়ের সময় লোকাল ডাটা দেখাবে যাতে পেজ খালি না থাকে
     try {
       const saved = localStorage.getItem(PRODUCTS_KEY);
       return saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
@@ -62,8 +63,28 @@ const App: React.FC = () => {
 
   const OWNER_PHONE = "01614997405";
 
+  // Firebase থেকে ডাটা রিয়েল-টাইমে পড়ার লজিক
   useEffect(() => {
-    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+    if (isConfigured && db) {
+      const productsRef = ref(db, 'products');
+      // ডাটাবেসে কিছু পরিবর্তন হলে সাথে সাথে এখানে আপডেট হবে
+      const unsubscribe = onValue(productsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data && Array.isArray(data)) {
+          setProducts(data);
+          // ব্যাকআপ হিসেবে লোকালে সেভ রাখা
+          localStorage.setItem(PRODUCTS_KEY, JSON.stringify(data));
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, []);
+
+  // যদি ফায়ারবেস না থাকে, তবে লোকাল স্টোরেজ ব্যবহার করবে
+  useEffect(() => {
+    if (!isConfigured) {
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+    }
   }, [products]);
 
   useEffect(() => {
@@ -106,19 +127,52 @@ const App: React.FC = () => {
     ));
   };
 
+  // পণ্য সেভ করার ফাংশন (Firebase + LocalStorage)
+  const saveProductsToDb = (newProductsList: Product[]) => {
+    if (isConfigured && db) {
+      // ফায়ারবেসে সেভ করা (সবার জন্য)
+      set(ref(db, 'products'), newProductsList)
+        .then(() => console.log("Data saved to Firebase"))
+        .catch(err => alert("ডাটাবেসে সেভ করতে সমস্যা হয়েছে: " + err.message));
+    } else {
+      // কনফিগারেশন না থাকলে লোকালে সেভ (শুধু নিজের জন্য)
+      setProducts(newProductsList);
+    }
+  };
+
   const addProduct = (product: Omit<Product, 'id'>) => {
     const newProduct = { ...product, id: Date.now().toString() };
-    setProducts(prev => [newProduct, ...prev]);
+    const updatedList = [newProduct, ...products];
+    // আমরা লোকালি স্টেট আপডেট করব না যদি ফায়ারবেস থাকে, কারণ onValue সেটা হ্যান্ডেল করবে
+    if (!isConfigured) {
+       setProducts(updatedList);
+    }
+    saveProductsToDb(updatedList);
   };
 
   const updateProduct = (updatedProduct: Product) => {
-    setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+    const updatedList = products.map(p => p.id === updatedProduct.id ? updatedProduct : p);
+    if (!isConfigured) {
+      setProducts(updatedList);
+    }
+    saveProductsToDb(updatedList);
   };
 
   const deleteProduct = (id: string) => {
     if(window.confirm('আপনি কি নিশ্চিত যে এই পণ্যটি মুছে ফেলতে চান?')) {
-      setProducts(prev => prev.filter(p => p.id !== id));
+      const updatedList = products.filter(p => p.id !== id);
+      if (!isConfigured) {
+        setProducts(updatedList);
+      }
+      saveProductsToDb(updatedList);
       setCart(prev => prev.filter(item => item.id !== id));
+    }
+  };
+
+  const deleteAllProducts = () => {
+    if(window.confirm('সতর্কতা: সব পণ্য মুছে ফেলা হবে! আপনি কি নিশ্চিত?')) {
+      if (!isConfigured) setProducts([]);
+      saveProductsToDb([]);
     }
   };
 
@@ -163,7 +217,7 @@ const App: React.FC = () => {
             onAdd={addProduct} 
             onUpdate={updateProduct}
             onDelete={deleteProduct} 
-            onDeleteAll={() => { if(window.confirm('সব মুছবেন?')) setProducts([]); }}
+            onDeleteAll={deleteAllProducts}
           />
         )}
       </main>
