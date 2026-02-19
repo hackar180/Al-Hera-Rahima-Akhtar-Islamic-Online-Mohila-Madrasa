@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Product } from '../types.ts';
-import Slider from '../components/Slider.tsx';
-import ProductCard from '../components/ProductCard.tsx';
+import { Product } from '../types';
+import Slider from '../components/Slider';
+import ProductCard from '../components/ProductCard';
 
 interface HomeProps {
   products: Product[];
@@ -12,7 +12,6 @@ interface HomeProps {
   setActiveCategory: (cat: string) => void;
 }
 
-// আপডেট করা ক্যাটাগরি লিস্ট
 const CATEGORIES = ['সকল পণ্য', 'Medicine', 'Hair Care', 'Personal Care', 'Food & Nutrition', 'General'];
 
 const Home: React.FC<HomeProps> = ({ products, addToCart, isSearching, activeCategory, setActiveCategory }) => {
@@ -82,9 +81,7 @@ const Home: React.FC<HomeProps> = ({ products, addToCart, isSearching, activeCat
 
       {!isSearching && (
         <>
-          {/* Social Community Section */}
           <section className="mt-20 mb-10 relative rounded-[3.5rem] p-10 md:p-16 text-white shadow-2xl overflow-hidden group">
-            {/* Background Image with Overlay */}
             <div className="absolute inset-0">
                <img 
                  src="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&q=80&w=2000" 
@@ -127,7 +124,6 @@ const Home: React.FC<HomeProps> = ({ products, addToCart, isSearching, activeCat
             </div>
           </section>
 
-          {/* Why Choose Us Section - Updated Text, Removed Image */}
           <section className="mt-20 mb-16 relative overflow-hidden bg-white rounded-[3.5rem] p-10 md:p-16 shadow-xl border border-green-100">
             <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-green-50 rounded-full opacity-50 blur-3xl"></div>
             <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-blue-50 rounded-full opacity-50 blur-3xl"></div>

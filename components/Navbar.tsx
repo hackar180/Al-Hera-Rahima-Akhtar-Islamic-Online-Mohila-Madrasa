@@ -6,7 +6,7 @@ interface NavbarProps {
   cartCount: number;
   setView: (view: ViewState) => void;
   onSearch: (query: string) => void;
-  searchQuery: string; // নতুন প্রপ: সার্চের লেখা ধরে রাখার জন্য
+  searchQuery: string;
   phone: string;
 }
 
@@ -26,7 +26,7 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount, setView, onSearch, searchQue
           <div className="relative">
             <input 
               type="text" 
-              value={searchQuery} // ইনপুট ভ্যালু ফিক্স করা হলো
+              value={searchQuery} 
               placeholder="পণ্য বা বৈশিষ্ট্য দিয়ে খুঁজুন..." 
               onChange={(e) => onSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all text-sm font-bold text-gray-800"
@@ -68,12 +68,11 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount, setView, onSearch, searchQue
           </button>
         </div>
       </div>
-      {/* Mobile Bottom Search & Quick Contact */}
       <div className="sm:hidden px-4 pb-4 flex space-x-2">
         <div className="relative flex-grow">
           <input 
             type="text" 
-            value={searchQuery} // মোবাইলের জন্যও ইনপুট ভ্যালু ফিক্স করা হলো
+            value={searchQuery} 
             placeholder="পণ্য খুঁজুন..." 
             onChange={(e) => onSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-sm font-bold text-gray-800"

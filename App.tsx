@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Product, CartItem, ViewState } from './types.ts';
-import Navbar from './components/Navbar.tsx';
-import Home from './pages/Home.tsx';
-import Admin from './pages/Admin.tsx';
-import Cart from './pages/Cart.tsx';
-import Checkout from './pages/Checkout.tsx';
-import { db, isConfigured } from './firebaseConfig.ts';
+import { Product, CartItem, ViewState } from './types';
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
+import Admin from './pages/Admin';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
+import { db, isConfigured } from './firebaseConfig';
 import { ref, onValue, set } from "firebase/database";
 
 const INITIAL_PRODUCTS: Product[] = [
@@ -43,7 +43,6 @@ const App: React.FC = () => {
   const CART_KEY = 'mxn_cart_v7';
 
   const [products, setProducts] = useState<Product[]>(() => {
-    // লোডিংয়ের সময় লোকাল ডাটা দেখাবে যাতে পেজ খালি না থাকে
     try {
       const saved = localStorage.getItem(PRODUCTS_KEY);
       return saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
@@ -63,16 +62,13 @@ const App: React.FC = () => {
 
   const OWNER_PHONE = "01614997405";
 
-  // Firebase থেকে ডাটা রিয়েল-টাইমে পড়ার লজিক
   useEffect(() => {
     if (isConfigured && db) {
       const productsRef = ref(db, 'products');
-      // ডাটাবেসে কিছু পরিবর্তন হলে সাথে সাথে এখানে আপডেট হবে
       const unsubscribe = onValue(productsRef, (snapshot) => {
         const data = snapshot.val();
         if (data && Array.isArray(data)) {
           setProducts(data);
-          // ব্যাকআপ হিসেবে লোকালে সেভ রাখা
           localStorage.setItem(PRODUCTS_KEY, JSON.stringify(data));
         }
       });
@@ -80,7 +76,6 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // যদি ফায়ারবেস না থাকে, তবে লোকাল স্টোরেজ ব্যবহার করবে
   useEffect(() => {
     if (!isConfigured) {
       localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
@@ -127,15 +122,12 @@ const App: React.FC = () => {
     ));
   };
 
-  // পণ্য সেভ করার ফাংশন (Firebase + LocalStorage)
   const saveProductsToDb = (newProductsList: Product[]) => {
     if (isConfigured && db) {
-      // ফায়ারবেসে সেভ করা (সবার জন্য)
       set(ref(db, 'products'), newProductsList)
         .then(() => console.log("Data saved to Firebase"))
         .catch(err => alert("ডাটাবেসে সেভ করতে সমস্যা হয়েছে: " + err.message));
     } else {
-      // কনফিগারেশন না থাকলে লোকালে সেভ (শুধু নিজের জন্য)
       setProducts(newProductsList);
     }
   };
@@ -143,7 +135,6 @@ const App: React.FC = () => {
   const addProduct = (product: Omit<Product, 'id'>) => {
     const newProduct = { ...product, id: Date.now().toString() };
     const updatedList = [newProduct, ...products];
-    // আমরা লোকালি স্টেট আপডেট করব না যদি ফায়ারবেস থাকে, কারণ onValue সেটা হ্যান্ডেল করবে
     if (!isConfigured) {
        setProducts(updatedList);
     }
@@ -182,7 +173,7 @@ const App: React.FC = () => {
         cartCount={cart.reduce((acc, item) => acc + item.cartQuantity, 0)} 
         setView={setView}
         onSearch={setSearchQuery}
-        searchQuery={searchQuery} // এখানে পাস করা হলো
+        searchQuery={searchQuery}
         phone={OWNER_PHONE}
       />
       

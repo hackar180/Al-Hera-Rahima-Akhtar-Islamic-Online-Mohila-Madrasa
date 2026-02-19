@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Product } from '../types.ts';
-import { isConfigured, CONFIG_KEY } from '../firebaseConfig.ts';
+import { Product } from '../types';
+import { isConfigured, CONFIG_KEY } from '../firebaseConfig';
 
 interface AdminProps {
   products: Product[];
@@ -12,13 +12,12 @@ interface AdminProps {
 }
 
 const Admin: React.FC<AdminProps> = ({ products, onAdd, onUpdate, onDelete, onDeleteAll }) => {
-  // লোকাল স্টোরেজ চেক করে লগইন অবস্থা নির্ধারণ করা হচ্ছে (পেজ ভিউ করার জন্য)
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return localStorage.getItem('mxn_admin_session') === 'true';
   });
   
   const [password, setPassword] = useState('');
-  const [actionPassword, setActionPassword] = useState(''); // প্রতি একশনের জন্য পাসওয়ার্ড স্টেট
+  const [actionPassword, setActionPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showGuide, setShowGuide] = useState(!isConfigured);
@@ -99,7 +98,6 @@ const Admin: React.FC<AdminProps> = ({ products, onAdd, onUpdate, onDelete, onDe
     }
   };
 
-  // ডিলিট করার সময় পাসওয়ার্ড চাওয়া হবে
   const handleDeleteCheck = (id: string) => {
     const userPass = prompt("পণ্যটি ডিলিট করতে অ্যাডমিন পাসওয়ার্ড দিন:");
     if (userPass === ADMIN_PASSWORD) {
@@ -109,7 +107,6 @@ const Admin: React.FC<AdminProps> = ({ products, onAdd, onUpdate, onDelete, onDe
     }
   };
 
-  // সব ডিলিট করার সময় পাসওয়ার্ড চাওয়া হবে
   const handleDeleteAllCheck = () => {
     const userPass = prompt("সব পণ্য ডিলিট করতে অ্যাডমিন পাসওয়ার্ড দিন:");
     if (userPass === ADMIN_PASSWORD) {
@@ -122,10 +119,8 @@ const Admin: React.FC<AdminProps> = ({ products, onAdd, onUpdate, onDelete, onDe
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // ১. নাম চেক
     if (!formData.name.trim()) return alert('পণ্যের নাম দিন');
 
-    // ২. অ্যাকশন পাসওয়ার্ড চেক (প্রতিবার সাবমিটের সময়)
     if (actionPassword !== ADMIN_PASSWORD) {
       alert('পাসওয়ার্ড ভুল! পণ্য সেভ বা আপডেট করতে সঠিক পাসওয়ার্ড দিন।');
       return;
@@ -146,9 +141,8 @@ const Admin: React.FC<AdminProps> = ({ products, onAdd, onUpdate, onDelete, onDe
       onAdd(productData);
     }
 
-    // ফর্ম রিসেট
     setFormData({ name: '', description: '', quantity: '', mrp: '', dp: '', pv: '', image: '', category: 'General' });
-    setActionPassword(''); // পাসওয়ার্ড ফিল্ড ক্লিয়ার করা হলো
+    setActionPassword('');
     if (fileInputRef.current) fileInputRef.current.value = '';
     
     if (isConfigured) {
@@ -202,8 +196,6 @@ const Admin: React.FC<AdminProps> = ({ products, onAdd, onUpdate, onDelete, onDe
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-24 px-2">
       <div className="lg:col-span-5">
-        
-        {/* ডাটাবেস স্ট্যাটাস এবং ইনপুট */}
         <div className={`rounded-2xl mb-6 shadow-sm border overflow-hidden ${isConfigured ? 'bg-green-100 border-green-200' : 'bg-white border-red-200'}`}>
           <div className="p-4 flex items-center justify-between cursor-pointer bg-white/50" onClick={() => setShowGuide(!showGuide)}>
             <div className="flex items-center">
@@ -222,7 +214,6 @@ const Admin: React.FC<AdminProps> = ({ products, onAdd, onUpdate, onDelete, onDe
             </button>
           </div>
           
-          {/* সেটিংস প্যানেল */}
           {(!isConfigured || showGuide) && (
             <div className="p-4 border-t border-gray-100 bg-white">
               {isConfigured ? (
@@ -275,7 +266,6 @@ const Admin: React.FC<AdminProps> = ({ products, onAdd, onUpdate, onDelete, onDe
           <form onSubmit={handleSubmit} className="space-y-4">
             <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="পণ্যের নাম *" className="w-full bg-gray-50 p-4 rounded-2xl outline-none font-bold" required />
             
-            {/* ক্যাটাগরি এবং পরিমাণ সেকশন */}
             <div className="grid grid-cols-1 gap-3">
               <div className="relative">
                 <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] font-bold text-green-600">ক্যাটাগরি সিলেক্ট করুন</label>
@@ -301,7 +291,6 @@ const Admin: React.FC<AdminProps> = ({ products, onAdd, onUpdate, onDelete, onDe
               <input type="file" ref={fileInputRef} onChange={handleImageChange} className="hidden" accept="image/*" />
             </div>
 
-            {/* পাসওয়ার্ড কনফার্মেশন ফিল্ড (প্রতিবার পণ্য অ্যাড/এডিট করার জন্য) */}
             <div className="bg-red-50 p-3 rounded-xl border border-red-100">
                <label className="block text-[10px] font-bold text-red-500 mb-1 ml-1 uppercase">নিরাপত্তার জন্য পাসওয়ার্ড দিন *</label>
                <input 
