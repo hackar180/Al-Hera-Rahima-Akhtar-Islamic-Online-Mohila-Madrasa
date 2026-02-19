@@ -1,7 +1,7 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Product } from '../types.ts';
-import { isConfigured } from '../firebaseConfig.ts';
+import { isConfigured, CONFIG_KEY } from '../firebaseConfig.ts';
 
 interface AdminProps {
   products: Product[];
@@ -12,9 +12,16 @@ interface AdminProps {
 }
 
 const Admin: React.FC<AdminProps> = ({ products, onAdd, onUpdate, onDelete, onDeleteAll }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // লোকাল স্টোরেজ চেক করে লগইন অবস্থা নির্ধারণ করা হচ্ছে
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('mxn_admin_session') === 'true';
+  });
+  
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // পাসওয়ার্ড দেখার জন্য স্টেট
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showGuide, setShowGuide] = useState(!isConfigured);
+  const [configInput, setConfigInput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const ADMIN_PASSWORD = 'kuyasa.com';
@@ -34,9 +41,16 @@ const Admin: React.FC<AdminProps> = ({ products, onAdd, onUpdate, onDelete, onDe
     e.preventDefault();
     if (password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
+      // সেশন সেভ করা হচ্ছে
+      localStorage.setItem('mxn_admin_session', 'true');
     } else {
       alert('ভুল পাসওয়ার্ড! সঠিক পাসওয়ার্ড: kuyasa.com');
     }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('mxn_admin_session');
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -52,6 +66,37 @@ const Admin: React.FC<AdminProps> = ({ products, onAdd, onUpdate, onDelete, onDe
         setFormData(prev => ({ ...prev, image: reader.result as string }));
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleConfigSave = () => {
+    try {
+      let jsonStr = configInput;
+      if (jsonStr.includes('=')) {
+        jsonStr = jsonStr.substring(jsonStr.indexOf('=') + 1);
+      }
+      jsonStr = jsonStr.trim().replace(/;$/, '');
+      
+      // eslint-disable-next-line no-new-func
+      const configObj = new Function(`return ${jsonStr}`)();
+
+      if (!configObj.apiKey || !configObj.projectId) {
+        throw new Error("Invalid Config");
+      }
+
+      localStorage.setItem(CONFIG_KEY, JSON.stringify(configObj));
+      alert('কনফিগারেশন সেভ হয়েছে! পেজ রিলোড হচ্ছে...');
+      window.location.reload();
+
+    } catch (e) {
+      alert('কোড সঠিক নয়। ফায়ারবেস কনসোল থেকে শুধু {...} ব্র্যাকেটের অংশটুকু বা পুরো কনফিগারেশন কপি করে দিন।');
+    }
+  };
+
+  const handleRemoveConfig = () => {
+    if(window.confirm('আপনি কি ডাটাবেস সংযোগ বিচ্ছিন্ন করতে চান?')) {
+      localStorage.removeItem(CONFIG_KEY);
+      window.location.reload();
     }
   };
 
@@ -80,24 +125,47 @@ const Admin: React.FC<AdminProps> = ({ products, onAdd, onUpdate, onDelete, onDe
     if (isConfigured) {
       alert('সফল! পণ্যটি ডাটাবেসে সেভ হয়েছে এবং সবাই এখন এটি দেখতে পাবে।');
     } else {
-      alert('সেভ হয়েছে (লোকাল)। সবাইকে দেখাতে firebaseConfig.ts ফাইলটি সেটআপ করুন।');
+      alert('সেভ হয়েছে (লোকাল)। সবাইকে দেখাতে ডাটাবেস কানেক্ট করুন।');
     }
   };
 
   if (!isAuthenticated) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 px-4">
-        <form onSubmit={handleLogin} className="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center">
-          <h2 className="text-2xl font-black mb-6">অ্যাডমিন লগইন</h2>
-          <input 
-            type="password" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="পাসওয়ার্ড দিন"
-            className="w-full bg-gray-50 border-2 border-transparent focus:border-green-500 p-4 rounded-2xl outline-none font-bold text-center mb-4"
-            required
-          />
-          <button type="submit" className="w-full bg-green-600 text-white font-black py-4 rounded-2xl shadow-lg">প্রবেশ করুন</button>
+      <div className="flex flex-col items-center justify-center py-20 px-4 min-h-[60vh]">
+        <form onSubmit={handleLogin} className="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center border border-green-50">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          </div>
+          <h2 className="text-2xl font-black mb-2 text-gray-800">অ্যাডমিন প্যানেল</h2>
+          <p className="text-gray-500 text-sm mb-8 font-bold">লগইন করতে পাসওয়ার্ড দিন</p>
+          
+          <div className="relative mb-6">
+            <input 
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="পাসওয়ার্ড লিখুন..."
+              className="w-full bg-gray-50 text-gray-900 border-2 border-gray-200 focus:border-green-500 focus:bg-white p-4 pr-12 rounded-2xl outline-none font-bold text-center transition-all placeholder-gray-400"
+              autoFocus
+              required
+            />
+            <button 
+              type="button" 
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-green-600"
+            >
+              {showPassword ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+              )}
+            </button>
+          </div>
+          
+          <button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-green-200 transition-all active:scale-95">
+            প্রবেশ করুন
+          </button>
+          <p className="mt-4 text-[10px] text-gray-400 font-bold">ডিফল্ট পাসওয়ার্ড: kuyasa.com</p>
         </form>
       </div>
     );
@@ -107,18 +175,69 @@ const Admin: React.FC<AdminProps> = ({ products, onAdd, onUpdate, onDelete, onDe
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-24 px-2">
       <div className="lg:col-span-5">
         
-        {/* ডাটাবেস স্ট্যাটাস ইন্ডিকেটর */}
-        <div className={`p-4 rounded-2xl mb-6 flex items-center justify-between shadow-sm border ${isConfigured ? 'bg-green-100 border-green-200 text-green-800' : 'bg-red-50 border-red-100 text-red-800'}`}>
-          <div className="flex items-center">
-             <div className={`w-3 h-3 rounded-full mr-3 animate-pulse ${isConfigured ? 'bg-green-500' : 'bg-red-500'}`}></div>
-             <div>
-               <h3 className="font-bold text-sm">{isConfigured ? 'ডাটাবেস লাইভ আছে' : 'ডাটাবেস কানেক্ট নেই'}</h3>
-               <p className="text-[10px] opacity-80">{isConfigured ? 'আপনার চেঞ্জ সবাই দেখতে পাবে' : 'শুধুমাত্র আপনার ফোনে সেভ হচ্ছে'}</p>
-             </div>
+        {/* ডাটাবেস স্ট্যাটাস এবং ইনপুট */}
+        <div className={`rounded-2xl mb-6 shadow-sm border overflow-hidden ${isConfigured ? 'bg-green-100 border-green-200' : 'bg-white border-red-200'}`}>
+          <div className="p-4 flex items-center justify-between cursor-pointer bg-white/50" onClick={() => setShowGuide(!showGuide)}>
+            <div className="flex items-center">
+               <div className={`w-3 h-3 rounded-full mr-3 animate-pulse ${isConfigured ? 'bg-green-500' : 'bg-red-500'}`}></div>
+               <div>
+                 <h3 className={`font-bold text-sm ${isConfigured ? 'text-green-800' : 'text-red-600'}`}>
+                   {isConfigured ? 'ডাটাবেস কানেক্টেড ✅' : 'ডাটাবেস সেটআপ বাকি ⚠️'}
+                 </h3>
+                 <p className="text-[10px] opacity-80 text-gray-600">
+                   {isConfigured ? 'সবার জন্য আপডেট হচ্ছে' : 'সেটআপ করতে ক্লিক করুন'}
+                 </p>
+               </div>
+            </div>
+            <button className={`text-[10px] font-black px-3 py-1 rounded shadow-sm ${isConfigured ? 'bg-white text-red-500' : 'bg-red-600 text-white'}`}>
+               {isConfigured ? 'সেটিংস' : 'সেটআপ'}
+            </button>
           </div>
-          {!isConfigured && (
-            <div className="text-[10px] font-black bg-white px-2 py-1 rounded">
-               Config Missing
+          
+          {/* সেটিংস প্যানেল */}
+          {(!isConfigured || showGuide) && (
+            <div className="p-4 border-t border-gray-100 bg-white">
+              {isConfigured ? (
+                <div className="text-center">
+                  <p className="text-sm text-green-700 font-bold mb-2">আপনার ডাটাবেস সফলভাবে চালু আছে।</p>
+                  <button onClick={handleRemoveConfig} className="text-xs bg-red-50 text-red-600 px-4 py-2 rounded-lg font-black border border-red-100 hover:bg-red-100">
+                    কনফিগারেশন মুছে ফেলুন
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="text-xs text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-2">
+                    <p className="font-bold text-gray-800 border-b border-gray-200 pb-1 mb-2">ফায়ারবেস কনসোল সেটআপ গাইড:</p>
+                    <ol className="list-decimal pl-4 space-y-1">
+                      <li><strong>MXN Shop</strong> প্রজেক্টে ক্লিক করুন।</li>
+                      <li>স্ক্রিনের মাঝখানে থাকা <strong>Web (&lt;/&gt;)</strong> আইকনে ক্লিক করুন।</li>
+                      <li>অ্যাপের নাম দিয়ে <strong>Register app</strong> করুন।</li>
+                      <li>পাওয়া কোডটি <code>const firebaseConfig = ...</code> কপি করুন।</li>
+                      <li>কোডটি নিচের বক্সে পেস্ট করুন।</li>
+                      <li className="text-red-600 font-bold border-t pt-1 mt-1">
+                         এরপর বাম মেনু থেকে "Build > Realtime Database"-এ গিয়ে "Create Database" এবং "Start in test mode" চালু করতে ভুলবেন না।
+                      </li>
+                    </ol>
+                  </div>
+
+                  <textarea 
+                    value={configInput}
+                    onChange={(e) => setConfigInput(e.target.value)}
+                    placeholder={'const firebaseConfig = {\n  apiKey: "...",\n  authDomain: "...",\n  ...\n};'}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-[10px] font-mono h-32 focus:outline-none focus:border-green-500"
+                  />
+                  <div className="flex justify-between items-center">
+                    <a href="https://console.firebase.google.com" target="_blank" rel="noreferrer" className="text-[10px] text-blue-600 underline font-bold">কনসোলে যান ↗</a>
+                    <button 
+                      onClick={handleConfigSave}
+                      disabled={!configInput}
+                      className="bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-black hover:bg-green-700 disabled:opacity-50 shadow-lg shadow-green-100"
+                    >
+                      সেভ ও কানেক্ট করুন
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -166,7 +285,7 @@ const Admin: React.FC<AdminProps> = ({ products, onAdd, onUpdate, onDelete, onDe
             </div>
             <div className="flex space-x-2">
                <button onClick={onDeleteAll} className="text-[10px] font-black bg-red-50 text-red-600 px-3 py-2 rounded-xl border border-red-100">সব মুছুন</button>
-               <button onClick={() => setIsAuthenticated(false)} className="text-[10px] font-black bg-gray-200 text-gray-600 px-3 py-2 rounded-xl">লগ আউট</button>
+               <button onClick={handleLogout} className="text-[10px] font-black bg-gray-200 text-gray-600 px-3 py-2 rounded-xl hover:bg-gray-300">লগ আউট</button>
             </div>
           </div>
           <div className="max-h-[500px] overflow-y-auto">

@@ -182,6 +182,7 @@ const App: React.FC = () => {
         cartCount={cart.reduce((acc, item) => acc + item.cartQuantity, 0)} 
         setView={setView}
         onSearch={setSearchQuery}
+        searchQuery={searchQuery} // এখানে পাস করা হলো
         phone={OWNER_PHONE}
       />
       

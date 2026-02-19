@@ -6,10 +6,11 @@ interface NavbarProps {
   cartCount: number;
   setView: (view: ViewState) => void;
   onSearch: (query: string) => void;
+  searchQuery: string; // নতুন প্রপ: সার্চের লেখা ধরে রাখার জন্য
   phone: string;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ cartCount, setView, onSearch, phone }) => {
+const Navbar: React.FC<NavbarProps> = ({ cartCount, setView, onSearch, searchQuery, phone }) => {
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
@@ -25,9 +26,10 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount, setView, onSearch, phone }) 
           <div className="relative">
             <input 
               type="text" 
+              value={searchQuery} // ইনপুট ভ্যালু ফিক্স করা হলো
               placeholder="পণ্য বা বৈশিষ্ট্য দিয়ে খুঁজুন..." 
               onChange={(e) => onSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all text-sm"
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all text-sm font-bold text-gray-800"
             />
             <svg className="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -71,9 +73,10 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount, setView, onSearch, phone }) 
         <div className="relative flex-grow">
           <input 
             type="text" 
+            value={searchQuery} // মোবাইলের জন্যও ইনপুট ভ্যালু ফিক্স করা হলো
             placeholder="পণ্য খুঁজুন..." 
             onChange={(e) => onSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-sm font-bold text-gray-800"
           />
           <svg className="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
