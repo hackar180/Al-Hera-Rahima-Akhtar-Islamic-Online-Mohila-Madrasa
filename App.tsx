@@ -6,6 +6,7 @@ import Home from './pages/Home.tsx';
 import Admin from './pages/Admin.tsx';
 import Cart from './pages/Cart.tsx';
 import Checkout from './pages/Checkout.tsx';
+import FloatingButtons from './components/FloatingButtons.tsx';
 import { db, isConfigured } from './firebaseConfig.ts';
 import { ref, onValue, set } from "firebase/database";
 
@@ -213,6 +214,8 @@ const App: React.FC = () => {
           />
         )}
       </main>
+
+      <FloatingButtons />
     </div>
   );
 };
