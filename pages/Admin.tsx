@@ -234,7 +234,7 @@ const Admin: React.FC<AdminProps> = ({ products, onAdd, onUpdate, onDelete, onDe
                       <li>পাওয়া কোডটি <code>const firebaseConfig = ...</code> কপি করুন।</li>
                       <li>কোডটি নিচের বক্সে পেস্ট করুন।</li>
                       <li className="text-red-600 font-bold border-t pt-1 mt-1">
-                         এরপর বাম মেনু থেকে "Build > Realtime Database"-এ গিয়ে "Create Database" এবং "Start in test mode" চালু করতে ভুলবেন না।
+                         এরপর বাম মেনু থেকে "Build &gt; Realtime Database"-এ গিয়ে "Create Database" এবং "Start in test mode" চালু করতে ভুলবেন না।
                       </li>
                     </ol>
                   </div>
