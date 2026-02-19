@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Product, CartItem, ViewState } from './types';
-import Navbar from './components/Navbar';
-import Home from './pages/Home';
-import Admin from './pages/Admin';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import { db, isConfigured } from './firebaseConfig';
+import { Product, CartItem, ViewState } from './types.ts';
+import Navbar from './components/Navbar.tsx';
+import Home from './pages/Home.tsx';
+import Admin from './pages/Admin.tsx';
+import Cart from './pages/Cart.tsx';
+import Checkout from './pages/Checkout.tsx';
+import { db, isConfigured } from './firebaseConfig.ts';
 import { ref, onValue, set } from "firebase/database";
 
 const INITIAL_PRODUCTS: Product[] = [

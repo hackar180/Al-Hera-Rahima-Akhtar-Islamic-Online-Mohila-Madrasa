@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Product } from '../types';
-import { isConfigured, CONFIG_KEY } from '../firebaseConfig';
+import { Product } from '../types.ts';
+import { isConfigured, CONFIG_KEY } from '../firebaseConfig.ts';
 
 interface AdminProps {
   products: Product[];
