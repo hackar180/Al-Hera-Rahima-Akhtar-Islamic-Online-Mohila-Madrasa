@@ -130,9 +130,10 @@ const Home: React.FC = () => {
             >
               <div className="relative rounded-2xl overflow-hidden border-8 border-white/10 shadow-2xl">
                 <img 
-                  src="https://images.unsplash.com/photo-1584551270911-65561192dfc2?auto=format&fit=crop&q=80&w=800" 
-                  alt="Madrasa Education" 
+                  src="https://images.unsplash.com/photo-1590076175571-4b5459efb099?auto=format&fit=crop&q=80&w=1200" 
+                  alt="Beautiful Mosque Madrasa" 
                   className="w-full h-auto"
+                  referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/60 to-transparent flex items-center justify-center">
                   <button className="bg-white/20 backdrop-blur-md p-6 rounded-full hover:scale-110 transition-transform group">
@@ -464,9 +465,10 @@ const Home: React.FC = () => {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="order-2 lg:order-1">
               <img 
-                src="https://images.unsplash.com/photo-1590073844006-3a44279d6df7?auto=format&fit=crop&q=80&w=800" 
+                src="https://images.unsplash.com/photo-1577563908411-5077b6dc7624?auto=format&fit=crop&q=80&w=800" 
                 alt="Learning" 
                 className="rounded-3xl shadow-2xl"
+                referrerPolicy="no-referrer"
               />
             </div>
             <div className="order-1 lg:order-2 space-y-8">

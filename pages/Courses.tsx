@@ -177,6 +177,7 @@ const Courses: React.FC = () => {
                     src={course.thumbnail || "https://images.unsplash.com/photo-1584551270911-65561192dfc2?auto=format&fit=crop&q=80&w=600"} 
                     alt={course.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    referrerPolicy="no-referrer"
                   />
                   <Badge className="absolute top-4 left-4 bg-emerald-700 text-white">
                     {course.category}

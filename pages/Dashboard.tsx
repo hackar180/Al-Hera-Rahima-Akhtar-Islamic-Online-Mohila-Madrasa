@@ -210,7 +210,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                   <Card key={course.id} className="overflow-hidden border-emerald-50 hover:shadow-md transition-all">
                     <div className="flex flex-col sm:flex-row">
                       <div className="w-full sm:w-40 h-40 shrink-0">
-                        <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+                        <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                       </div>
                       <div className="p-6 flex-grow space-y-4">
                         <div>
